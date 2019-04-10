@@ -4,12 +4,14 @@ namespace app\controllers;
 
 use Yii;
 use yii\filters\AccessControl;
+use yii\data\Pagination;
+use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
 
+use app\models\LoginForm;
+use app\models\Vk;
 use app\models\tables\Items;
 
 class SiteController extends Controller
@@ -61,10 +63,27 @@ class SiteController extends Controller
      *
      * @return string
      */
-    public function actionIndex()
+    public function actionIndex($page = 1)
     {
+        $vk = new Vk();
+        $query = Items::find();
+        $countQuery = clone $query;
+        $pages = new Pagination([
+            'totalCount' => $countQuery->count(),
+            'pageSize' => 12
+        ]);
+        $products = $query->offset($pages->offset)->limit($pages->limit);
         return $this->render('index', [
-            'items' => Items::find()->all()
+            'items' => $query->all(),
+            'pages' => $pages,
+            'vkAuth' => $vk->getLink()
+        ]);
+    }
+
+    public function actionView($name)
+    {
+        return $this->render('view', [
+            'item' => Items::find()->where([ 'translite' => $name])->one()
         ]);
     }
 
@@ -73,21 +92,28 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionLogin()
+    public function actionLogin($code = null, $access_token = null)
     {
-        if (!Yii::$app->user->isGuest) {
-            return $this->goHome();
+        $vk = new Vk();
+        if (is_null($code)) {
+            return;
         }
+        $response = json_decode('{"access_token":"537b0eb6e5a01aae2cf889eff16f10f3883a5bb256badd43b3aeff631b4c119ae4cba8f583c0b756bb8d7","expires_in":0,"user_id":71803813}');
+        var_dump($response);
+        
+        // if (!Yii::$app->user->isGuest) {
+        //     return $this->goHome();
+        // }
 
-        $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
-        }
+        // $model = new LoginForm();
+        // if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        //     return $this->goBack();
+        // }
 
-        $model->password = '';
-        return $this->render('login', [
-            'model' => $model,
-        ]);
+        // $model->password = '';
+        // return $this->render('login', [
+        //     'model' => $model,
+        // ]);
     }
 
     /**
@@ -100,33 +126,5 @@ class SiteController extends Controller
         Yii::$app->user->logout();
 
         return $this->goHome();
-    }
-
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
-    {
-        return $this->render('about');
     }
 }

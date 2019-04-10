@@ -13,6 +13,11 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
     ],
     'components' => [
+        'urlManager' => [
+            'enablePrettyUrl' => true,
+            'rules' => [
+            ],
+        ],
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
             // 'cache' => 'cache',
