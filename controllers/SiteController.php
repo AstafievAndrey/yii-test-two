@@ -10,9 +10,10 @@ use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
 
-use app\models\LoginForm;
 use app\models\Vk;
 use app\models\tables\Items;
+use app\models\tables\Users;
+use app\models\User;
 
 class SiteController extends Controller
 {
@@ -92,14 +93,31 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionLogin($code = null, $access_token = null)
+    public function actionLogin($code = null)
     {
         $vk = new Vk();
         if (is_null($code)) {
             return;
         }
-        $response = json_decode('{"access_token":"537b0eb6e5a01aae2cf889eff16f10f3883a5bb256badd43b3aeff631b4c119ae4cba8f583c0b756bb8d7","expires_in":0,"user_id":71803813}');
-        var_dump($response);
+        $user = new Users();
+        $response = $vk->getAccessToken($code);
+        $userInfo = $vk->getUser($response->user_id, $response->access_token);
+        $user = Users::find()->where(['vk_user_id' => $response->user_id])->one();
+        if(is_null($user)) {
+            $user = new Users();
+            $user->vk_user_id = $response->user_id;
+            $user->first_name = $userInfo->response[0]->first_name;
+            $user->last_name = $userInfo->response[0]->last_name;
+            $user->access_token = $response->access_token;
+            $user->expires_in = $response->expires_in;
+            $user->save();
+        } else {
+            $user->access_token = $response->access_token;
+            $user->expires_in = $response->expires_in;
+            $user->save();
+        }
+
+        Yii::$app->user->login(User::findIdentity($user->id), 0);
         
         // if (!Yii::$app->user->isGuest) {
         //     return $this->goHome();

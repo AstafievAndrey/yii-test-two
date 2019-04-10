@@ -29,7 +29,7 @@ class Vk extends \yii\base\BaseObject
         $this->_version = $config['version'];
     }
 
-    public function getLinkAccessToken(string $code): string {
+    private function getLinkAccessToken(string $code): string {
         // todo убрать client secret из публичного метода
         return 'https://oauth.vk.com/access_token?client_id='.$this->_clientId
             .'&client_secret='.$this->_secureKey
@@ -43,9 +43,20 @@ class Vk extends \yii\base\BaseObject
         $this->_curl = new curl\Curl();
     }
 
-    public function getAccessToken(string $code) {
-        $response = $curl->get($vk->getLinkAccessToken($code));
+    public function getAccessToken(string $code): object {
+        $response = $this->_curl->get($this->getLinkAccessToken($code));
         return json_decode($response);
+    }
+
+    public function getUser(int $user_id, string $token): object {
+        return json_decode(
+                $this->_curl->get(
+                    'https://api.vk.com/method/users.get?user_ids='.$user_id
+                        .'&fields=bdate'.
+                        '&access_token='.$token
+                        .'&v='.$this->_version
+                )
+            );
     }
     
 
