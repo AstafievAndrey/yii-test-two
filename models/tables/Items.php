@@ -3,6 +3,7 @@
 namespace app\models\tables;
 
 use Yii;
+use app\models\tables\Ratings;
 
 /**
  * This is the model class for table "items".
@@ -92,6 +93,16 @@ class Items extends \yii\db\ActiveRecord
     public function getItemsImages()
     {
         return $this->hasMany(ItemsImages::className(), ['item_id' => 'id']);
+    }
+
+    public function getRatingUser(int $id) {
+        return Ratings::findOne(['user_id' => $id, 'item_id' => $this->id]);
+    }
+
+    public function getCountRatingType(string $type) {
+        return Ratings::find()
+                ->where(['item_id' => $this->id, 'type' => $type])
+                ->count();
     }
 
     /**

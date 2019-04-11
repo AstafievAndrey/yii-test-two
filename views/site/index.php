@@ -1,10 +1,10 @@
 <?php
 use yii\helpers\Html;
+use yii\helpers\Url;
 use yii\widgets\LinkPager;
 /* @var $this yii\web\View */
 
 $this->title = 'Каталог';
-echo $vkAuth;
 ?>
 <!-- <div class="row">
     <div class="col-sm-12">
@@ -21,9 +21,6 @@ echo $vkAuth;
         foreach($items as $key => $item) {
     ?>
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="rating">
-                <span><?=round(($item->sum_votes/$item->count_votes),1)?></span>
-            </div>
             <div class="thumbnail">
                 <?php 
                     if(!empty($item->itemsImages)) {
@@ -42,7 +39,21 @@ echo $vkAuth;
                             [
                                 'class' => 'btn btn-default',
                                 'data' => ['method' => 'post'],
-                        ])?>
+                        ])?>  
+                        <button onclick="like(<?=$item->id?>)" class="btn btn-success">
+                            <span class="glyphicon glyphicon-thumbs-up" 
+                                aria-hidden="true"></span> 
+                            <span class="badge">
+                                <?=$item->getCountRatingType('like');?>
+                            </span>
+                        </button> 
+                        <button onclick="dislike(<?=$item->id?>)"  class="btn btn-danger">
+                            <span class="glyphicon glyphicon-thumbs-down" 
+                                aria-hidden="true"></span> 
+                            <span class="badge">
+                            <?=$item->getCountRatingType('dislike');?>
+                            </span>
+                        </button> 
                     </p>
                 </div>
             </div>
@@ -61,3 +72,24 @@ echo $vkAuth;
         ?>
     </div>
 </div>
+
+<script>
+    function like(item_id) {
+        fetch(`<?=Url::to(['like/index']);?>?item_id=${item_id}`)
+        .then((response) => {
+            return response.json();
+        })
+        .then(function(result) {
+            console.log(result);
+        });
+    }
+    function dislike(item_id) {
+        fetch(`<?=Url::to(['like/dislike']);?>?item_id=${item_id}`)
+        .then((response) => {
+            return response.json();
+        })
+        .then(function(result) {
+            console.log(result);
+        });
+    }
+</script>

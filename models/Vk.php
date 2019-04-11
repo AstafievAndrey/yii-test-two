@@ -30,7 +30,6 @@ class Vk extends \yii\base\BaseObject
     }
 
     private function getLinkAccessToken(string $code): string {
-        // todo убрать client secret из публичного метода
         return 'https://oauth.vk.com/access_token?client_id='.$this->_clientId
             .'&client_secret='.$this->_secureKey
             .'&redirect_uri='.$this->_redirectUri 

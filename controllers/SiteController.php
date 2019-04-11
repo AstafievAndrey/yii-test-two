@@ -11,9 +11,10 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 
 use app\models\Vk;
+use app\models\User;
 use app\models\tables\Items;
 use app\models\tables\Users;
-use app\models\User;
+use app\models\tables\Ratings;
 
 class SiteController extends Controller
 {
@@ -66,7 +67,6 @@ class SiteController extends Controller
      */
     public function actionIndex($page = 1)
     {
-        $vk = new Vk();
         $query = Items::find();
         $countQuery = clone $query;
         $pages = new Pagination([
@@ -77,7 +77,6 @@ class SiteController extends Controller
         return $this->render('index', [
             'items' => $query->all(),
             'pages' => $pages,
-            'vkAuth' => $vk->getLink()
         ]);
     }
 
@@ -95,12 +94,20 @@ class SiteController extends Controller
      */
     public function actionLogin($code = null)
     {
+        if (!Yii::$app->user->isGuest) {
+            return $this->goHome();
+        }
         $vk = new Vk();
         if (is_null($code)) {
-            return;
+            return $this->render('login', ['vkAuth' => $vk->getLink()]);
         }
-        $user = new Users();
         $response = $vk->getAccessToken($code);
+        if (isset($response->error)) {
+            return $this->render('error', [
+                'name'=>'Авторизация',
+                'message' => $response->error_description
+            ]);
+        }
         $userInfo = $vk->getUser($response->user_id, $response->access_token);
         $user = Users::find()->where(['vk_user_id' => $response->user_id])->one();
         if(is_null($user)) {
@@ -118,20 +125,7 @@ class SiteController extends Controller
         }
 
         Yii::$app->user->login(User::findIdentity($user->id), 0);
-        
-        // if (!Yii::$app->user->isGuest) {
-        //     return $this->goHome();
-        // }
-
-        // $model = new LoginForm();
-        // if ($model->load(Yii::$app->request->post()) && $model->login()) {
-        //     return $this->goBack();
-        // }
-
-        // $model->password = '';
-        // return $this->render('login', [
-        //     'model' => $model,
-        // ]);
+        $this->redirect('index');
     }
 
     /**
@@ -142,7 +136,6 @@ class SiteController extends Controller
     public function actionLogout()
     {
         Yii::$app->user->logout();
-
         return $this->goHome();
     }
 }
