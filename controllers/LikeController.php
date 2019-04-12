@@ -12,6 +12,7 @@ use yii\filters\VerbFilter;
 
 use app\models\Vk;
 use app\models\tables\Ratings;
+use app\models\tables\Items;
 use app\models\tables\Users;
 use app\models\User;
 
@@ -45,7 +46,7 @@ class LikeController extends Controller
         ];
     }
 
-    private function save(int $item_id, string $type): Ratings {
+    private function save(int $item_id, string $type): array {
         $rating = Ratings::findOne([
             'user_id' => Yii::$app->user->identity->id,
             'item_id' => $item_id
@@ -60,7 +61,11 @@ class LikeController extends Controller
             $rating->type = $type;
             $rating->save();
         }
-        return $rating;
+        $item = Items::findOne($item_id);
+        return [
+            'like' => $item->getCountRatingType('like'),
+            'dislike' => $item->getCountRatingType('dislike'),
+        ];
     }
 
     public function actionIndex(int $item_id)

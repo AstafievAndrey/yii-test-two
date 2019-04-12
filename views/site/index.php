@@ -40,20 +40,22 @@ $this->title = 'Каталог';
                                 'class' => 'btn btn-default',
                                 'data' => ['method' => 'post'],
                         ])?>  
-                        <button onclick="like(<?=$item->id?>)" class="btn btn-success">
-                            <span class="glyphicon glyphicon-thumbs-up" 
-                                aria-hidden="true"></span> 
-                            <span class="badge">
-                                <?=$item->getCountRatingType('like');?>
-                            </span>
-                        </button> 
-                        <button onclick="dislike(<?=$item->id?>)"  class="btn btn-danger">
-                            <span class="glyphicon glyphicon-thumbs-down" 
-                                aria-hidden="true"></span> 
-                            <span class="badge">
-                            <?=$item->getCountRatingType('dislike');?>
-                            </span>
-                        </button> 
+                        <span>
+                            <button onclick="like(<?=$item->id?>, this)" class="btn btn-success like">
+                                <span class="glyphicon glyphicon-thumbs-up" 
+                                    aria-hidden="true"></span> 
+                                <span class="badge">
+                                    <?=$item->getCountRatingType('like');?>
+                                </span>
+                            </button> 
+                            <button onclick="dislike(<?=$item->id?>, this)"  class="btn btn-danger dislike">
+                                <span class="glyphicon glyphicon-thumbs-down" 
+                                    aria-hidden="true"></span> 
+                                <span class="badge">
+                                <?=$item->getCountRatingType('dislike');?>
+                                </span>
+                            </button> 
+                        </span>
                     </p>
                 </div>
             </div>
@@ -74,22 +76,31 @@ $this->title = 'Каталог';
 </div>
 
 <script>
-    function like(item_id) {
+
+    function setSpanLikeDislike(element, data) {
+        var parent = element.parentNode;
+        parent.getElementsByClassName('like')[0]
+                .getElementsByClassName('badge')[0].innerText = data.like;
+        parent.getElementsByClassName('dislike')[0]
+                .getElementsByClassName('badge')[0].innerText = data.dislike;
+    }
+
+    function like(item_id, element) {
         fetch(`<?=Url::to(['like/index']);?>?item_id=${item_id}`)
         .then((response) => {
             return response.json();
         })
         .then(function(result) {
-            console.log(result);
+            setSpanLikeDislike(element, result);
         });
     }
-    function dislike(item_id) {
+    function dislike(item_id, element) {
         fetch(`<?=Url::to(['like/dislike']);?>?item_id=${item_id}`)
         .then((response) => {
             return response.json();
         })
         .then(function(result) {
-            console.log(result);
+            setSpanLikeDislike(element, result);
         });
     }
 </script>
