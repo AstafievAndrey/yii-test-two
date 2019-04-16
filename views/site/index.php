@@ -35,20 +35,24 @@ $this->title = 'Каталог';
                 <div class="caption">
                     <h4 class="head-item"><?=$item->name?></h4>
                     <p>
-                    <?= Html::a('Просмотр', ['view', 'name' => $item->translite], 
+                    <?= Html::a('Просмотр', ['view/'.$item->translite], 
                             [
                                 'class' => 'btn btn-default',
                                 'data' => ['method' => 'post'],
                         ])?>  
                         <span>
-                            <button onclick="like(<?=$item->id?>, this)" class="btn btn-success like">
+                            <button onclick="like(<?=$item->id?>, this)" 
+                                    <?=($guest ? 'disabled' : '')?>
+                                    class="btn btn-success like">
                                 <span class="glyphicon glyphicon-thumbs-up" 
                                     aria-hidden="true"></span> 
                                 <span class="badge">
                                     <?=$item->getCountRatingType('like');?>
                                 </span>
                             </button> 
-                            <button onclick="dislike(<?=$item->id?>, this)"  class="btn btn-danger dislike">
+                            <button onclick="dislike(<?=$item->id?>, this)"  
+                                    <?=($guest ? 'disabled' : '')?>
+                                    class="btn btn-danger dislike">
                                 <span class="glyphicon glyphicon-thumbs-down" 
                                     aria-hidden="true"></span> 
                                 <span class="badge">

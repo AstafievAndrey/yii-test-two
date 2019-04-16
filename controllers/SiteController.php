@@ -77,6 +77,7 @@ class SiteController extends Controller
         return $this->render('index', [
             'items' => $query->all(),
             'pages' => $pages,
+            'guest' => Yii::$app->user->isGuest
         ]);
     }
 
@@ -137,5 +138,10 @@ class SiteController extends Controller
     {
         Yii::$app->user->logout();
         return $this->goHome();
+    }
+
+    public function actionTest($name)
+    {
+        var_dump($name);
     }
 }

@@ -16,6 +16,7 @@ $config = [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'rules' => [
+                ['class' => 'app\components\ItemViewRule',]
             ],
         ],
         'authManager' => [
