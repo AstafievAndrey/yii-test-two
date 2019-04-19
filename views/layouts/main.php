@@ -35,22 +35,23 @@ AppAsset::register($this);
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    echo Nav::widget([
-        'options' => ['class' => 'navbar-nav navbar-right'],
-        'items' => [
-            Yii::$app->user->isGuest ? (
-                ['label' => 'Войти', 'url' => ['site/login']]
-            ) : (
-                '<li>'
+    $navWidgetItems = [];
+    if(Yii::$app->user->isGuest) {
+        $navWidgetItems[] = ['label' => 'Войти', 'url' => ['site/login']];
+    } else {
+        $navWidgetItems[] = ['label' => 'Добавить', 'url' => ['personal/main/create']];
+        $navWidgetItems[] = '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(
                     'Выйти (' . Yii::$app->user->identity->first_name . ')',
                     ['class' => 'btn btn-link logout']
                 )
                 . Html::endForm()
-                . '</li>'
-            )
-        ],
+            . '</li>';
+    }
+    echo Nav::widget([
+        'options' => ['class' => 'navbar-nav navbar-right'],
+        'items' => $navWidgetItems,
     ]);
     NavBar::end();
     ?>
@@ -66,9 +67,9 @@ AppAsset::register($this);
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; My Company <?= date('Y') ?></p>
+        <p class="pull-left">&copy; Народный рейтинг <?= date('Y') ?></p>
 
-        <p class="pull-right"><?= Yii::powered() ?></p>
+        <p class="pull-right">Все права защищены</p>
     </div>
 </footer>
 

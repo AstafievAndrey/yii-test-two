@@ -7,7 +7,6 @@ use yii\filters\AccessControl;
 use yii\data\Pagination;
 use yii\web\Controller;
 use yii\web\Response;
-use yii\filters\VerbFilter;
 use yii\helpers\Url;
 
 use app\models\Vk;
@@ -36,12 +35,6 @@ class SiteController extends Controller
                     ],
                 ],
             ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post'],
-                ],
-            ],
         ];
     }
 
@@ -53,10 +46,6 @@ class SiteController extends Controller
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
-            ],
-            'captcha' => [
-                'class' => 'yii\captcha\CaptchaAction',
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
             ],
         ];
     }
