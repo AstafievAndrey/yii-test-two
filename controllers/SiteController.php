@@ -5,16 +5,17 @@ namespace app\controllers;
 use Yii;
 use yii\filters\AccessControl;
 use yii\data\Pagination;
-use yii\helpers\Url;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
+use yii\helpers\Url;
 
 use app\models\Vk;
 use app\models\User;
 use app\models\tables\Items;
 use app\models\tables\Users;
-use app\models\tables\Ratings;
+use app\models\tables\Cities;
+use app\models\tables\Categories;
 
 class SiteController extends Controller
 {
@@ -61,25 +62,42 @@ class SiteController extends Controller
     }
 
     /**
-     * Displays homepage.
-     *
+     * Отобразим главную страницу
+     */
+    public function actionIndex($city = '', $category = '', $rating = 'like')
+    {
+        $this->redirect(Url::toRoute('/list'));
+    }
+
+    /**
+     * @param string $city - параметр поиска по городу
+     * @param string $category - параметр поиска по категории
+     * @param string $rating - параметр поиска по лайкам/дизлайкам
      * @return string
      */
-    public function actionIndex($page = 1)
+    public function actionList($city = '', $category = '', $rating = 'like')
     {
         $query = Items::find();
         $countQuery = clone $query;
         $pages = new Pagination([
             'totalCount' => $countQuery->count(),
-            'pageSize' => 12
+            'pageSize' => 1,
+            'route' => Url::to('list')
         ]);
         $products = $query->offset($pages->offset)->limit($pages->limit);
         return $this->render('index', [
-            'items' => $query->all(),
+            'guest' => Yii::$app->user->isGuest,
+            'items' => $products->all(),
             'pages' => $pages,
-            'guest' => Yii::$app->user->isGuest
+            'cities' => Cities::findAll(['delete_at' => null]),
+            'categories' => Categories::findAll(['delete_at' => null]),
+            'selectedCity' => $city,
+            'selectedCategory' => $category,
+            'selectedRating' => $rating,
         ]);
     }
+
+
 
     public function actionView($name)
     {
@@ -89,8 +107,9 @@ class SiteController extends Controller
     }
 
     /**
-     * Login action.
+     * Страница для авторизации на сайте через ВК
      *
+     * @param string $code - код от вк для авторизации
      * @return Response|string
      */
     public function actionLogin($code = null)
@@ -138,10 +157,5 @@ class SiteController extends Controller
     {
         Yii::$app->user->logout();
         return $this->goHome();
-    }
-
-    public function actionTest($name)
-    {
-        var_dump($name);
     }
 }

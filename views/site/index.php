@@ -5,17 +5,63 @@ use yii\widgets\LinkPager;
 /* @var $this yii\web\View */
 
 $this->title = 'Каталог';
+//var_dump($cities);
 ?>
 <!-- <div class="row">
     <div class="col-sm-12">
         реклама
     </div>
 </div>
-<div class="row">
-    <div class="col-sm-12">
-        фильтры
+-->
+<div class="row site-index-filter shadow">
+    <div class="col-sm-8 form-inline ">
+        <select name="city" class="form-control">
+            <option <?=($selectedCity === '' ? 'selected': '')?>
+                    value="" >
+                Все города
+            </option>
+            <?php
+                foreach($cities as $item) {
+                    ?>
+                    <option <?=($selectedCity === $item->translite ? 'selected': '')?>
+                            value="<?=$item->translite?>">
+                                <?=$item->name?>
+                    </option>
+                    <?php
+                }
+            ?>
+        </select>
+        <select name="category" class="form-control">
+            <option <?=($selectedCategory === '' ? 'selected': '')?>
+                    value="">
+                Все категории
+            </option>
+            <?php
+            foreach($categories as $item) {
+                ?>
+                <option <?=($selectedCategory === $item->translite ? 'selected': '')?>
+                        value="<?=$item->translite?>">
+                    <?=$item->name?>
+                </option>
+                <?php
+            }
+            ?>
+        </select>
+        <select name="rating" class="form-control">
+            <option <?=($selectedRating === 'like' ? 'selected': '')?>
+                    value="like">
+                По лайкам
+            </option>
+            <option <?=($selectedRating === 'dislike' ? 'selected': '')?>
+                    value="dislike">
+                По дизлайкам
+            </option>
+        </select>
     </div>
-</div> -->
+    <div class="col-sm-4 align-right">
+        <button type="submit" onclick="filter()" class="btn btn-default">Поиск</button>
+    </div>
+</div>
 <div class="row">
     <?php
         foreach($items as $key => $item) {
@@ -80,6 +126,14 @@ $this->title = 'Каталог';
 </div>
 
 <script>
+    
+    function filter() {
+        var url = '<?=Url::toRoute('/list');?>';
+        var city = document.querySelector('select[name="city"]').value;
+        var category = document.querySelector('select[name="category"]').value;
+        var rating = document.querySelector('select[name="rating"]').value;
+        window.location.href = `${url}/${city !== '' ? city : 'all-city'}/${category !== '' ? category : 'all-category'}?rating=${rating}`;
+    }
 
     function setSpanLikeDislike(element, data) {
         var parent = element.parentNode;
