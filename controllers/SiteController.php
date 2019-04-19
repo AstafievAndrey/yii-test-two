@@ -64,7 +64,7 @@ class SiteController extends Controller
     /**
      * Отобразим главную страницу
      */
-    public function actionIndex($city = '', $category = '', $rating = 'like')
+    public function actionIndex()
     {
         $this->redirect(Url::toRoute('/list'));
     }
@@ -77,11 +77,11 @@ class SiteController extends Controller
      */
     public function actionList($city = '', $category = '', $rating = 'like')
     {
-        $query = Items::find();
+        $query = Items::getQueryFilter($city, $category, $rating);
         $countQuery = clone $query;
         $pages = new Pagination([
             'totalCount' => $countQuery->count(),
-            'pageSize' => 1,
+            'pageSize' => 12,
             'route' => Url::to('list')
         ]);
         $products = $query->offset($pages->offset)->limit($pages->limit);

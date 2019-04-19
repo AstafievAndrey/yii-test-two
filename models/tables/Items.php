@@ -95,14 +95,41 @@ class Items extends \yii\db\ActiveRecord
         return $this->hasMany(ItemsImages::className(), ['item_id' => 'id']);
     }
 
-    public function getRatingUser(int $id) {
+    public function getRatingUser(int $id)
+    {
         return Ratings::findOne(['user_id' => $id, 'item_id' => $this->id]);
     }
 
-    public function getCountRatingType(string $type) {
+    public function getCountRatingType(string $type)
+    {
         return Ratings::find()
                 ->where(['item_id' => $this->id, 'type' => $type])
                 ->count();
+    }
+
+    /**
+     * @param $city
+     * @param $category
+     * @param $rating
+     * @return ItemsQuery
+     */
+    public static function getQueryFilter($city, $category, $rating)
+    {
+        $query = Items::find()->select('items.*');
+        $query->addSelect('(select count(*) from ratings r where r.item_id = items.id and type = \'like\') as rating_like');
+        $query->addSelect('(select count(*) from ratings r where r.item_id = items.id and type = \'dislike\') as rating_dislike');
+        if(!empty($city)) {
+            $query->innerJoin( 'items_cities', 'items_cities.item_id = items.id');
+            $query->innerJoin( 'cities', 'cities.id = items_cities.city_id');
+            $query->andWhere(['cities.translite' => $city]);
+        }
+        if(!empty($category)) {
+            $query->innerJoin( 'items_categories', 'items_categories.item_id = items.id');
+            $query->innerJoin( 'categories', 'categories.id = items_categories.category_id');
+            $query->andWhere(['categories.translite' => $category]);
+        }
+        $query->orderBy(($rating === 'like' ? 'rating_like' : 'rating_dislike').' desc');
+        return $query;
     }
 
     /**
