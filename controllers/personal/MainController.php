@@ -37,7 +37,7 @@ class MainController extends Controller
     {
         $this->getView()->registerJsFile (
             '@web/js/add-form.js',
-            ['position' => \yii\web\View::POS_HEAD]
+            ['position' => \yii\web\View::POS_END]
         );
         return $this->render('add-form', [
             'cities' => Cities::findAll(['delete_at' => null]),

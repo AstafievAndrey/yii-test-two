@@ -1,9 +1,9 @@
-const imgSrc = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCIgdmlld0JveD0iMCAwIDE0MCAxNDAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiPjwhLS0KU291cmNlIFVSTDogaG9sZGVyLmpzLzE0MHgxNDAKQ3JlYXRlZCB3aXRoIEhvbGRlci5qcyAyLjYuMC4KTGVhcm4gbW9yZSBhdCBodHRwOi8vaG9sZGVyanMuY29tCihjKSAyMDEyLTIwMTUgSXZhbiBNYWxvcGluc2t5IC0gaHR0cDovL2ltc2t5LmNvCi0tPjxkZWZzPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+PCFbQ0RBVEFbI2hvbGRlcl8xNmEzYWM4ZDUzMCB0ZXh0IHsgZmlsbDojQUFBQUFBO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1mYW1pbHk6QXJpYWwsIEhlbHZldGljYSwgT3BlbiBTYW5zLCBzYW5zLXNlcmlmLCBtb25vc3BhY2U7Zm9udC1zaXplOjEwcHQgfSBdXT48L3N0eWxlPjwvZGVmcz48ZyBpZD0iaG9sZGVyXzE2YTNhYzhkNTMwIj48cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCIgZmlsbD0iI0VFRUVFRSIvPjxnPjx0ZXh0IHg9IjQ0LjA1NDY4NzUiIHk9Ijc0LjUiPjE0MHgxNDA8L3RleHQ+PC9nPjwvZz48L3N2Zz4=';
 const addForm = new AddForm();
 
 function AddForm() {
     this.windowUrl = window.URL || window.webkitURL;
     this.siteCount = 1;
+    this.fileList = [];
 }
 
 // удалим поле добавить сайт
@@ -20,6 +20,7 @@ AddForm.prototype.addSite = function () {
                         '<button onclick="addForm.removeSite(this)" class="btn btn-default" type="button">-</button>' +
                     '</span>' +
                 '</div>';
+    let fileList = [];
     if(this.siteCount !== 5) {
         document.getElementById('sites').innerHTML += sites;
         this.siteCount += 1;
@@ -31,49 +32,66 @@ AddForm.prototype.openFileSelect = function () {
     document.getElementById('file').click();
 };
 
-// валидация на добавленные файлы
+AddForm.prototype.removeFileList = function(elem, fileListIndex) {
+    this.fileList.splice(fileListIndex, 1);
+    elem.parentNode.remove();
+}
+
+// добавим изображение в блок
+AddForm.prototype.addImage = function(src, fileListIndex) {
+    let div = document.createElement('div');
+    let divRemove = document.createElement('div');
+    let img = document.createElement('img');
+    div.classList.add('col-sm-2', 'col-xs-6');
+    div.innerHTML = `<span onclick="addForm.removeFileList(this, ${fileListIndex})" 
+                        class="glyphicon glyphicon-remove img-remove" aria-hidden="true"></span>`;
+    img.classList.add('img-thumbnail', 'add-image');
+    img.src = src;
+    div.appendChild(img);
+    document.getElementById('img-container').appendChild(div);
+}
+
+// валидация на добавляемые файлы
 AddForm.prototype.handleChangeFile = function (elem) {
+    let newFileList = [ ...this.fileList, ...elem.files].filter((current, index, arr) => {
+        return arr.map(itemArr => itemArr['name']).indexOf(current['name']) === index
+            && arr.map(itemArr => itemArr['size']).indexOf(current['size']) === index;
+    });
     let error = document.getElementById('errorFiles');
     let countError = 0;
+    let removeIndex = [];
 
-    let showError = (text) => {
+    const showError = (text) => {
         error.innerHTML += `<div>${text}</div>`;
         countError += 1;
     }
-
     const setPreview = (files) => {
-        let images = document.getElementsByClassName('add-image');
-        Array.prototype.forEach.call(files,  (file, index) => {
-            images[index].src = this.windowUrl.createObjectURL(file);
-        });
-    }
-
-    const resetPreview = function () {
-        let images = document.getElementsByClassName('add-image');
-        Array.prototype.forEach.call(images, function (image) {
-            image.src = imgSrc;
+        Array.prototype.forEach.call(files,  (file) => {
+            this.addImage(this.windowUrl.createObjectURL(file));
         });
     }
 
     error.innerHTML = '';
-    if (elem.files.length > 6) {
-        showError('Выберите мешьше шести файлов.')
-    }
-
-    Array.prototype.forEach.call(elem.files, function (file) {
+    Array.prototype.forEach.call(newFileList, function (file, index) {
         if (file.size > 250000) {
             showError(`Файл ${file.name} превышает 250 кБ`);
+            removeIndex.unshift(index);
         }
     });
+    removeIndex.forEach((value) => {
+        newFileList.splice(value, 1)
+    });
 
-    if (countError === 0) {
-        document.getElementById('errorFiles').classList.add('hidden');
-        setPreview(elem.files);
-    } else {
-        error.classList.remove('hidden');
-        resetPreview();
-        document.getElementById('file').value = "";
+    if (newFileList.length > 6) {
+        showError('Выберите меньше шести файлов.')
     }
+
+    this.fileList = newFileList;
+    document.getElementById('img-container').innerHTML = '';
+    setPreview(newFileList);
+
+    (countError === 0) ? document.getElementById('errorFiles').classList.add('hidden')
+        : error.classList.remove('hidden');
 }
 
 AddForm.prototype.validateForm = function () {

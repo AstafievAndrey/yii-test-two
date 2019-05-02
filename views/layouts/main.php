@@ -39,7 +39,7 @@ AppAsset::register($this);
     if(Yii::$app->user->isGuest) {
         $navWidgetItems[] = ['label' => 'Войти', 'url' => ['site/login']];
     } else {
-        $navWidgetItems[] = ['label' => 'Добавить', 'url' => ['personal/main/add-formß']];
+        $navWidgetItems[] = ['label' => 'Добавить', 'url' => ['personal/main/add-form']];
         $navWidgetItems[] = '<li>'
                 . Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(

@@ -81,19 +81,7 @@ $src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLT
                     </button>
                 </div>
             </div>
-            <div class="row m-t-8">
-                <?php
-                    for($i = 0; $i < 6; $i++) {
-                ?>
-                    <div class="col-sm-2 col-xs-6">
-                        <img class="img-thumbnail add-image"
-                             alt="140x140"
-                             src="<?=$src?>">
-                    </div>
-                <?php
-                    }
-                ?>
-            </div>
+            <div id="img-container" class="row m-t-8"></div>
             <div class="row m-t-8">
                 <div class="col-sm-12">
                     <div class="input-group">

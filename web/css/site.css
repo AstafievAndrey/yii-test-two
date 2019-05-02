@@ -11,6 +11,13 @@ h1, .h1 {
     display: none;
 }
 
+.img-remove {
+    position: absolute;
+    right: 20px;
+    top: 5px;
+    cursor: pointer;
+}
+
 .border-color-red {
     border-color: #ff9aaa;
 }
