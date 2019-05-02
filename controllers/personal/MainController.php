@@ -6,6 +6,9 @@ use Yii;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 
+use app\models\tables\Cities;
+use app\models\tables\Categories;
+
 class MainController extends Controller
 {
     public function behaviors()
@@ -27,11 +30,18 @@ class MainController extends Controller
 
     public function actionIndex()
     {
-        return $this->render('create');
+        return $this->actionAddForm();
     }
 
-    public function actionCreate()
+    public function actionAddForm()
     {
-        return $this->render('create');
+        $this->getView()->registerJsFile (
+            '@web/js/add-form.js',
+            ['position' => \yii\web\View::POS_HEAD]
+        );
+        return $this->render('add-form', [
+            'cities' => Cities::findAll(['delete_at' => null]),
+            'categories' => Categories::findAll(['delete_at' => null])
+        ]);
     }
 }

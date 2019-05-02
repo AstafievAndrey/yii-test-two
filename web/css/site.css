@@ -7,6 +7,39 @@ h1, .h1 {
     font-size: 25px;
 }
 
+.hidden {
+    display: none;
+}
+
+.border-color-red {
+    border-color: #ff9aaa;
+}
+
+.add-image {
+    width: 140px;
+    height: 140px;
+    cursor: pointer;
+}
+
+.add-image:hover {
+    border-color: grey;
+}
+
+.label-create {
+    font-weight: bold;
+}
+
+.input-group .btn {
+    border-bottom-left-radius: 0px;
+    border-top-left-radius: 0px;
+}
+
+.textarea {
+    min-height: 100px;
+    min-width: 100%;
+    max-width: 100%;
+}
+
 .m-t-8 {
     margin-top: 8px;
 }
