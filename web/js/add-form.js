@@ -40,7 +40,6 @@ AddForm.prototype.removeFileList = function(elem, fileListIndex) {
 // добавим изображение в блок
 AddForm.prototype.addImage = function(src, fileListIndex) {
     let div = document.createElement('div');
-    let divRemove = document.createElement('div');
     let img = document.createElement('img');
     div.classList.add('col-sm-2', 'col-xs-6');
     div.innerHTML = `<span onclick="addForm.removeFileList(this, ${fileListIndex})" 
