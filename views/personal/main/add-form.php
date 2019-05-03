@@ -8,7 +8,7 @@ $src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLT
             <h1 class="align-center"><?=$this->title?></h1>
             <div class="row">
                 <div class="col-sm-6">
-                    <select name="city[]" multiple id="" required class="form-control input-sm">
+                    <select name="cities[]" multiple id="" required class="form-control input-sm">
                         <?php foreach($cities as $city) {
                             echo '<option value="' . $city->id . '">' . $city->name . '</option>';
                         }
@@ -21,7 +21,7 @@ $src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLT
             </div>
             <div class="row m-t-8">
                 <div class="col-sm-6">
-                    <select name="city[]" multiple id="" required class="form-control input-sm">
+                    <select name="categories[]" multiple id="" required class="form-control input-sm">
                         <?php foreach($categories as $category) {
                             echo '<option value="' . $category->id . '">' . $category->name . '</option>';
                         }
@@ -73,7 +73,7 @@ $src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLT
                                    id="file"
                                    multiple
                                    type="file"
-                                   name="image[]"
+                                   name="images[]"
                                    required
                                    onchange="addForm.handleChangeFile(this)">
                         </div>
@@ -86,7 +86,7 @@ $src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLT
                 <div class="col-sm-12">
                     <div class="input-group">
                         <span class="input-group-addon">
-                            <input type="checkbox" required>
+                            <input name="agree" type="checkbox" required>
                         </span>
                         <button class="btn btn-default"
                                 type="button"
@@ -96,8 +96,6 @@ $src = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLT
                 </div>
             </div>
         </form>
-        <div id="alerts" class="col-sm-12 m-t-8">
-            <div id="errorFiles" class="alert alert-danger hidden"></div>
-        </div>
+        <div id="alerts-errors" class="col-sm-12 m-t-8"></div>
     </div>
 </div>

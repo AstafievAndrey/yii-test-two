@@ -1,4 +1,7 @@
 const addForm = new AddForm();
+const FILE_ERROR = 'fileError';
+const AGREE_ERROR = 'agreeError';
+const STANDARD_ERROR = 'standardError';
 
 function AddForm() {
     this.windowUrl = window.URL || window.webkitURL;
@@ -14,15 +17,14 @@ AddForm.prototype.removeSite = function (element) {
 
 // добавим поле добавить сайт
 AddForm.prototype.addSite = function () {
-    let sites = '<div class="input-group m-t-8">' +
-                    '<input name="sites[]" type="text" class="form-control" required>' +
+    let div = document.createElement('div');
+    div.classList.add('input-group', 'm-t-8');
+    div.innerHTML = '<input name="sites[]" type="text" class="form-control" required>' +
                     '<span class="input-group-btn">' +
                         '<button onclick="addForm.removeSite(this)" class="btn btn-default" type="button">-</button>' +
-                    '</span>' +
-                '</div>';
-    let fileList = [];
+                    '</span>';
     if(this.siteCount !== 5) {
-        document.getElementById('sites').innerHTML += sites;
+        document.getElementById('sites').appendChild(div);
         this.siteCount += 1;
     }
 }
@@ -50,30 +52,41 @@ AddForm.prototype.addImage = function(src, fileListIndex) {
     document.getElementById('img-container').appendChild(div);
 }
 
+// добавим определенный тип ошибок
+AddForm.prototype.showError = function(text, typeError) {
+    let alerts = document.getElementById('alerts-errors');
+    alerts.innerHTML += `<div class="alert alert-danger ${typeError}">${text}</div>`;
+}
+
+// удалим определенный тип ошибок
+AddForm.prototype.removeError = function(...typeError) {
+    let alerts = document.getElementById('alerts-errors');
+    typeError.forEach((className) => {
+        let htmlCollection = alerts.getElementsByClassName(className);
+        for(let i = htmlCollection.length; i > 0; i--) {
+            alerts.removeChild(htmlCollection[i-1]);
+        }
+    });
+
+}
+
 // валидация на добавляемые файлы
 AddForm.prototype.handleChangeFile = function (elem) {
-    let newFileList = [ ...this.fileList, ...elem.files].filter((current, index, arr) => {
-        return arr.map(itemArr => itemArr['name']).indexOf(current['name']) === index
-            && arr.map(itemArr => itemArr['size']).indexOf(current['size']) === index;
-    });
-    let error = document.getElementById('errorFiles');
-    let countError = 0;
-    let removeIndex = [];
-
-    const showError = (text) => {
-        error.innerHTML += `<div>${text}</div>`;
-        countError += 1;
-    }
     const setPreview = (files) => {
         Array.prototype.forEach.call(files,  (file) => {
             this.addImage(this.windowUrl.createObjectURL(file));
         });
     }
+    let newFileList = [ ...this.fileList, ...elem.files].filter((current, index, arr) => {
+        return arr.map(itemArr => itemArr['name']).indexOf(current['name']) === index
+            && arr.map(itemArr => itemArr['size']).indexOf(current['size']) === index;
+    });
+    let errors = [];
+    let removeIndex = [];
 
-    error.innerHTML = '';
     Array.prototype.forEach.call(newFileList, function (file, index) {
         if (file.size > 250000) {
-            showError(`Файл ${file.name} превышает 250 кБ`);
+            errors.push(`<div>Файл ${file.name} превышает 250 кБ.</div>`);
             removeIndex.unshift(index);
         }
     });
@@ -82,32 +95,67 @@ AddForm.prototype.handleChangeFile = function (elem) {
     });
 
     if (newFileList.length > 6) {
-        showError('Выберите меньше шести файлов.')
+        errors.push(`<div>Выберите меньше шести файлов.</div>`);
     }
 
     this.fileList = newFileList;
     document.getElementById('img-container').innerHTML = '';
     setPreview(newFileList);
 
-    (countError === 0) ? document.getElementById('errorFiles').classList.add('hidden')
-        : error.classList.remove('hidden');
+    this.removeError(FILE_ERROR);
+    if(errors.length !== 0) {
+        this.showError(errors.join(''), FILE_ERROR);
+    }
 }
 
-AddForm.prototype.validateForm = function () {
-    let inp = form.querySelectorAll('input');
-    let select = form.querySelectorAll('select');
-    let textarea = form.querySelectorAll('textarea');
-    let validate = (elements) => {
-        Array.prototype.forEach.call(elements, (elem) => {
+// подсветим поля красным
+AddForm.prototype.fieldIlluminationError = function (...elements) {
+    let hasError = false;
+    elements.forEach( nodeList =>
+        Array.prototype.forEach.call(nodeList, (elem) => {
             if(!elem.checkValidity()) {
+                hasError = true;
                 elem.classList.add('border-color-red');
             } else {
                 elem.classList.remove('border-color-red');
             }
+        })
+    );
+    return hasError;
+}
+
+AddForm.prototype.validateForm = function () {
+    this.removeError(AGREE_ERROR, FILE_ERROR, STANDARD_ERROR);
+    if (this.fieldIlluminationError(
+        form.querySelectorAll('input[type="text"]'),
+        form.querySelectorAll('select'),
+        form.querySelectorAll('textarea')
+    )) {
+        this.showError('Заполните все поля.', STANDARD_ERROR);
+    }
+
+    if(!form.agree.checked) {
+        this.showError('Подтвердите пользовательское соглашение.', AGREE_ERROR);
+    }
+
+    if(this.fileList.length === 0) {
+        this.showError('Добавьте изображения.', FILE_ERROR);
+    }
+
+    if(form.checkValidity()) {
+        if(this.fileList.length > 6) {
+            this.showError('Оставьте только 6 изображений.', FILE_ERROR);
+        }
+        let data = new FormData(form);
+        data.delete('images[]');
+        this.fileList.forEach(file => {
+            data.append('images[]', file);
+        });
+
+        fetch("/login", {
+            method: "POST",
+            body: data
         });
     }
-    validate(inp);
-    validate(select);
-    validate(textarea);
 }
 
